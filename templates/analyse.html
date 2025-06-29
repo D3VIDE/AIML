@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analisis Data Churn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-8xl">
+      <h1 class="text-3xl font-bold text-center text-blue-800 mb-8">
+        Analisis Data Churn Nasabah
+      </h1>
+
+      <!-- Raw Data Section -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Data Mentah</h2>
+        <div
+          class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
+        >
+          <div class="min-w-full overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+              {{ raw_data_html|safe }}
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Processed Data Section -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Data yang Telah Diproses
+        </h2>
+        <div
+          class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
+        >
+          <div class="min-w-full overflow-hidden">
+            {{ processed_data_html|safe }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Churn Visualization Section -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Visualisasi Churn
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {% for plot in churn_plots %}
+          <div
+            class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+          >
+            <img
+              src="data:image/png;base64,{{ plot }}"
+              alt="Churn Visualization"
+              class="w-full h-auto rounded-md"
+            />
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Clustering Analysis Section -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Analisis Cluster
+        </h2>
+
+        <!-- Elbow & Silhouette -->
+        <div class="mb-8">
+          <h3 class="text-lg font-medium text-gray-700 mb-4">
+            Metode Elbow dan Silhouette
+          </h3>
+          <div
+            class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+          >
+            <img
+              src="data:image/png;base64,{{ elbow_silhouette }}"
+              alt="Elbow and Silhouette"
+              class="w-full h-auto rounded-md"
+            />
+          </div>
+        </div>
+
+        <!-- Final Clusters -->
+        <div class="mb-8">
+          <h3 class="text-lg font-medium text-gray-700 mb-4">
+            Visualisasi Cluster Final
+          </h3>
+          <div
+            class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+          >
+            <img
+              src="data:image/png;base64,{{ cluster_plot }}"
+              alt="Final Clusters"
+              class="w-full h-auto rounded-md"
+            />
+          </div>
+        </div>
+
+        <!-- Cluster Analysis -->
+        <div>
+          <h3 class="text-lg font-medium text-gray-700 mb-4">
+            Karakteristik Cluster
+          </h3>
+          <div class="grid grid-cols-1 gap-6">
+            {% for plot in cluster_analysis_plots %}
+            <div
+              class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+            >
+              <img
+                src="data:image/png;base64,{{ plot }}"
+                alt="Cluster Analysis"
+                class="w-full h-auto rounded-md"
+              />
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Back Button -->
+      <div class="text-center mt-8">
+        <a
+          href="{{ url_for('index') }}"
+          class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
+        >
+          Kembali ke Halaman Upload
+        </a>
+      </div>
+    </div>
+  </body>
+</html>
