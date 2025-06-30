@@ -133,8 +133,8 @@ def clustering(df):
 
     return X, elbow_silhouette
 
-def final_clustering(df, X):
-    final_k = 4
+def final_clustering(df, X, final_k=3):
+    
     kmeans = KMeans(n_clusters=final_k, random_state=42, n_init=10)
     df_clustered = df.copy()
     df_clustered['Cluster'] = kmeans.fit_predict(X)
@@ -181,7 +181,7 @@ def analysis_cluster(df_clustered, df_unscaled):
 
     return df_unscaled, plots
 
-def genetic_algorithm(df):
+def genetic_algorithm(df,pop_size=30, ngen=20):
     # Siapkan data X dan y (pastikan sudah preprocessing & scaling)
     X = df.drop(columns=['Exited', 'Cluster']).values
     y = df['Exited'].values
@@ -208,9 +208,9 @@ def genetic_algorithm(df):
     toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
     toolbox.register("select", tools.selTournament, tournsize=3)
 
-    pop = toolbox.population(n=30) #ini 
+    pop = toolbox.population(n=pop_size) #ini 
     hof = tools.HallOfFame(1)
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=20 ,    
+    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=ngen ,    
                         stats=tools.Statistics(lambda ind: ind.fitness.values),
                         halloffame=hof, verbose=True)  #ini
 

@@ -3,59 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Analisis Data Churn</title>
+    <title>Churn Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-50">
     <div class="container mx-auto px-4 py-8 max-w-8xl">
       <h1 class="text-3xl font-bold text-center text-blue-800 mb-8">
-        Analisis Data Churn Nasabah
+        Churn Analysis - Step {{ step }}
       </h1>
 
-      <!-- Raw Data Section -->
+      <!-- Step 1 Content -->
+      {% if step == 1 %}
       <div
         class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
       >
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Data Mentah</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Raw Data</h2>
         <div
           class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
         >
-          <div class="min-w-full overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-              {{ raw_data_html|safe }}
-            </table>
-          </div>
+          {{ raw_data_html|safe }}
         </div>
       </div>
 
-      <!-- Processed Data Section -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
       >
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          Data yang Telah Diproses
-        </h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Processed Data</h2>
         <div
           class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
         >
-          <div class="min-w-full overflow-hidden">
-            {{ processed_data_html|safe }}
-          </div>
+          {{ processed_data_html|safe }}
         </div>
       </div>
 
-      <!-- Churn Visualization Section -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
       >
         <h2 class="text-xl font-semibold text-gray-800 mb-6">
-          Visualisasi Churn
+          Churn Visualization
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {% for plot in churn_plots %}
-          <div
-            class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
-          >
+          <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
             <img
               src="data:image/png;base64,{{ plot }}"
               alt="Churn Visualization"
@@ -66,77 +55,149 @@
         </div>
       </div>
 
-      <!-- Clustering Analysis Section -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
       >
         <h2 class="text-xl font-semibold text-gray-800 mb-6">
-          Analisis Cluster
+          Optimal Cluster Analysis
         </h2>
-
-        <!-- Elbow & Silhouette -->
-        <div class="mb-8">
-          <h3 class="text-lg font-medium text-gray-700 mb-4">
-            Metode Elbow dan Silhouette
-          </h3>
-          <div
-            class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
-          >
-            <img
-              src="data:image/png;base64,{{ elbow_silhouette }}"
-              alt="Elbow and Silhouette"
-              class="w-full h-auto rounded-md"
-            />
-          </div>
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
+          <img
+            src="data:image/png;base64,{{ elbow_silhouette }}"
+            alt="Elbow and Silhouette"
+            class="w-full h-auto rounded-md"
+          />
         </div>
 
-        <!-- Final Clusters -->
-        <div class="mb-8">
-          <h3 class="text-lg font-medium text-gray-700 mb-4">
-            Visualisasi Cluster Final
-          </h3>
-          <div
-            class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
-          >
-            <img
-              src="data:image/png;base64,{{ cluster_plot }}"
-              alt="Final Clusters"
-              class="w-full h-auto rounded-md"
-            />
-          </div>
-        </div>
-
-        <!-- Cluster Analysis -->
-        <div>
-          <h3 class="text-lg font-medium text-gray-700 mb-4">
-            Karakteristik Cluster
-          </h3>
-          <div class="grid grid-cols-1 gap-6">
-            {% for plot in cluster_analysis_plots %}
-            <div
-              class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+        <form method="POST" action="{{ url_for('analyse') }}">
+          <input type="hidden" name="current_step" value="2" />
+          <div class="mb-4">
+            <label for="k_value" class="block text-gray-700 font-medium mb-2"
+              >Select Number of Clusters (K):</label
             >
-              <img
-                src="data:image/png;base64,{{ plot }}"
-                alt="Cluster Analysis"
-                class="w-full h-auto rounded-md"
+            <input
+              type="number"
+              id="k_value"
+              name="k_value"
+              min="2"
+              max="10"
+              value="3"
+              class="w-full px-4 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+          >
+            Next: Run Clustering
+          </button>
+        </form>
+      </div>
+      {% endif %}
+
+      <!-- Step 2 Content -->
+      {% if step == 2 %}
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Cluster Visualization (K = {{ k_value }})
+        </h2>
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
+          <img
+            src="data:image/png;base64,{{ cluster_plot }}"
+            alt="Cluster Visualization"
+            class="w-full h-auto rounded-md"
+          />
+        </div>
+
+        <form method="POST" action="{{ url_for('analyse') }}">
+          <input type="hidden" name="current_step" value="3" />
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+          >
+            Next: Cluster Analysis
+          </button>
+        </form>
+      </div>
+      {% endif %}
+
+      <!-- Step 3 Content -->
+      {% if step == 3 %}
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Cluster Characteristics
+        </h2>
+        <div class="grid grid-cols-1 gap-6 mb-6">
+          {% for plot in cluster_analysis_plots %}
+          <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <img
+              src="data:image/png;base64,{{ plot }}"
+              alt="Cluster Analysis"
+              class="w-full h-auto rounded-md"
+            />
+          </div>
+          {% endfor %}
+        </div>
+
+        <form method="POST" action="{{ url_for('analyse') }}">
+          <input type="hidden" name="current_step" value="4" />
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">
+            Genetic Algorithm Parameters
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label for="pop_size" class="block text-gray-700 font-medium mb-2"
+                >Population Size:</label
+              >
+              <input
+                type="number"
+                id="pop_size"
+                name="pop_size"
+                min="10"
+                max="100"
+                value="30"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
-            {% endfor %}
+            <div>
+              <label for="ngen" class="block text-gray-700 font-medium mb-2"
+                >Number of Generations:</label
+              >
+              <input
+                type="number"
+                id="ngen"
+                name="ngen"
+                min="5"
+                max="50"
+                value="20"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
           </div>
-        </div>
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+          >
+            Run Genetic Algorithm
+          </button>
+        </form>
       </div>
+      {% endif %}
+
+      <!-- Step 4 Content -->
+      {% if step == 4 %}
       <!-- Feature Selection Results -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
       >
         <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          Hasil Seleksi Fitur dengan Algoritma Genetika
+          Selected Features
         </h2>
         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h3 class="text-lg font-medium text-blue-800 mb-2">
-            Fitur Terpilih:
-          </h3>
           <ul class="list-disc list-inside space-y-1">
             {% for feature in selected_features %}
             <li class="text-blue-700">{{ feature }}</li>
@@ -150,20 +211,14 @@
         class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
       >
         <h2 class="text-xl font-semibold text-gray-800 mb-6">
-          Perbandingan Akurasi KNN
+          KNN Accuracy Comparison
         </h2>
-
-        <!-- KNN Results Table -->
         <div
           class="mb-6 overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
         >
           {{ knn_results_html|safe }}
         </div>
-
-        <!-- KNN Comparison Plot -->
-        <div
-          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
-        >
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <img
             src="data:image/png;base64,{{ knn_plot }}"
             alt="KNN Comparison"
@@ -172,139 +227,112 @@
         </div>
       </div>
 
-      <!-- Confusion Matrix Comparison -->
+      <!-- Confusion Matrix -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
       >
         <h2 class="text-xl font-semibold text-gray-800 mb-6">
-          Perbandingan Confusion Matrix
+          Confusion Matrix Comparison
         </h2>
-
-        <!-- Metrics Tables -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-            <h3 class="text-lg font-medium text-green-800 mb-2">Semua Fitur</h3>
+            <h3 class="text-lg font-medium text-green-800 mb-2">
+              All Features
+            </h3>
             <div class="overflow-x-auto">{{ full_metrics_html|safe }}</div>
           </div>
           <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h3 class="text-lg font-medium text-blue-800 mb-2">Fitur GA</h3>
+            <h3 class="text-lg font-medium text-blue-800 mb-2">GA Features</h3>
             <div class="overflow-x-auto">{{ ga_metrics_html|safe }}</div>
           </div>
         </div>
-
-        <!-- Confusion Matrix Plot -->
-        <div
-          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
-        >
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <img
             src="data:image/png;base64,{{ confusion_plot }}"
-            alt="Confusion Matrix Comparison"
+            alt="Confusion Matrix"
             class="w-full h-auto rounded-md"
           />
         </div>
       </div>
 
-      <!-- Model Comparison with GA Features -->
+      <!-- Model Comparisons -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
       >
         <h2 class="text-xl font-semibold text-gray-800 mb-6">
-          Perbandingan Model dengan Fitur GA
+          Model Comparisons
         </h2>
-
-        <!-- GA Model Results Table -->
-        <div
-          class="mb-6 overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
-        >
-          {{ ga_results_html|safe }}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <h3 class="text-lg font-medium text-gray-700 mb-2">
+              With GA Features
+            </h3>
+            <div class="mb-6 overflow-x-auto">{{ ga_results_html|safe }}</div>
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <img
+                src="data:image/png;base64,{{ ga_model_plot }}"
+                alt="GA Models"
+                class="w-full h-auto rounded-md"
+              />
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-medium text-gray-700 mb-2">
+              With All Features
+            </h3>
+            <div class="mb-6 overflow-x-auto">{{ all_results_html|safe }}</div>
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <img
+                src="data:image/png;base64,{{ all_model_plot }}"
+                alt="All Features Models"
+                class="w-full h-auto rounded-md"
+              />
+            </div>
+          </div>
         </div>
-
-        <!-- GA Model Comparison Plot -->
-        <div
-          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
-        >
-          <img
-            src="data:image/png;base64,{{ ga_model_plot }}"
-            alt="GA Model Comparison"
-            class="w-full h-auto rounded-md"
-          />
-        </div>
-      </div>
-
-      <!-- Model Comparison with All Features -->
-      <div
-        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
-      >
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">
-          Perbandingan Model dengan Semua Fitur
-        </h2>
-
-        <!-- All Features Model Results Table -->
-        <div
-          class="mb-6 overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
-        >
-          {{ all_results_html|safe }}
-        </div>
-
-        <!-- All Features Model Comparison Plot -->
-        <div
-          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
-        >
-          <img
-            src="data:image/png;base64,{{ all_model_plot }}"
-            alt="All Features Model Comparison"
-            class="w-full h-auto rounded-md"
-          />
-        </div>
-      </div>
-
-      <!-- GA vs All Features Comparison -->
-      <div
-        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
-      >
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">
-          Perbandingan Fitur GA vs Semua Fitur
-        </h2>
-
-        <!-- Comparison Plot -->
-        <div
-          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
-        >
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <img
             src="data:image/png;base64,{{ comparison_plot }}"
-            alt="GA vs All Features Comparison"
+            alt="Comparison"
             class="w-full h-auto rounded-md"
           />
         </div>
       </div>
+
       {% if show_prediction_button %}
       <div
-        class="prediction-section"
-        style="
-          margin-top: 30px;
-          padding: 20px;
-          background: #f8f9fa;
-          border-radius: 5px;
-        "
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200 text-center"
       >
-        <h3 style="color: #2c3e50">Manual Churn Prediction</h3>
-        <p>Enter customer details to predict churn probability</p>
         <a
-          href="/predict_manual"
-          class="btn btn-primary"
-          style="background-color: #3498db; border: none"
+          href="{{ url_for('predict_manual') }}"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md inline-block"
         >
           Predict Customer Churn
         </a>
       </div>
-      {% endif %}
-      <!-- Back Button -->
-      <div class="text-center mt-8">
+      {% endif %} {% endif %}
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between mt-8">
+        {% if step > 1 %}
+        <form method="POST" action="{{ url_for('analyse') }}">
+          <input type="hidden" name="current_step" value="{{ step - 1 }}" />
+          <button
+            type="submit"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md"
+          >
+            Previous
+          </button>
+        </form>
+        {% else %}
+        <div></div>
+        {% endif %}
+
         <a
           href="{{ url_for('index') }}"
-          class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
         >
-          Kembali ke Halaman Upload
+          Back to Upload
         </a>
       </div>
     </div>
