@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold mb-6">Configure Custom Analysis</h1>
+        
+        <form method="POST" action="{{ url_for('configure_analysis') }}" class="space-y-6">
+            <!-- 1. Preprocessing Options -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">1. Data Preprocessing</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Columns to Remove</label>
+                    <div class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border rounded">
+                        {% for column in columns %}
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="drop_columns" value="{{ column }}" 
+                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <span>{{ column }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Missing Value Handling</label>
+                    <select name="impute_strategy" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="mean">Mean (for numerical)</option>
+                        <option value="median">Median (for numerical)</option>
+                        <option value="most_frequent">Most Frequent (for categorical)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 2. Clustering Configuration -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">2. Clustering Configuration</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Clustering Method</label>
+                        <select name="cluster_method" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="kmeans">K-Means</option>
+                            <option value="hierarchical">Hierarchical</option>
+                            <option value="dbscan">DBSCAN</option>
+                            <option value="none">No Clustering</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Number of Clusters</label>
+                        <input type="number" name="n_clusters" min="2" max="10" value="4" 
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3. Feature Selection -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">3. Feature Selection</h2>
+                
+                <label class="flex items-start space-x-3">
+                    <input type="checkbox" name="use_ga" checked 
+                           class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <div>
+                        <span class="block text-sm font-medium text-gray-700">Use Genetic Algorithm</span>
+                        <p class="text-sm text-gray-500">Automatically select the most important features</p>
+                        
+                        <div class="mt-4 pl-6 space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Population Size</label>
+                                <input type="number" name="ga_population" min="10" max="100" value="30" 
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Generations</label>
+                                <input type="number" name="ga_generations" min="5" max="50" value="20" 
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+            
+            <!-- 4. Model Comparison -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">4. Model Comparison</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Models</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        {% for model in default_models %}
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="models" value="{{ model }}" checked
+                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <span>{{ model.replace('_', ' ')|title }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Test Size: 
+                        <span id="test-size-value">30%</span>
+                    </label>
+                    <input type="range" name="test_size" min="10" max="50" value="30" 
+                           class="w-full" oninput="document.getElementById('test-size-value').textContent = this.value + '%'">
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                    Run Custom Analysis
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Simple client-side functionality
+        document.querySelector('input[name="test_size"]').addEventListener('input', function() {
+            document.getElementById('test-size-value').textContent = this.value + '%';
+        });
+    </script>
+</body>
+</html>

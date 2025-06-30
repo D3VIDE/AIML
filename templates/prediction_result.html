@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .result-container { max-width: 800px; margin: 0 auto; }
+        .prediction-card { margin-top: 20px; }
+        .churn { color: #dc3545; }
+        .no-churn { color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <h2>Prediction Result</h2>
+        
+        <div class="card prediction-card">
+            <div class="card-body">
+                <h3 class="{{ 'churn' if '❌' in result.prediction else 'no-churn' }}">
+                    {{ result.prediction }}
+                </h3>
+                <p>Probability of Churn: {{ result.probability }}</p>
+                
+                <h4>Input Details:</h4>
+                <table class="table table-bordered">
+                    {% for key, value in result.input_data.items() %}
+                    <tr>
+                        <th>{{ key }}</th>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                
+                <a href="/predict_manual" class="btn btn-primary">New Prediction</a>
+                <a href="/" class="btn btn-secondary">Back to Main Page</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

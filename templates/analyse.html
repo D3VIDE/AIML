@@ -126,7 +126,178 @@
           </div>
         </div>
       </div>
+      <!-- Feature Selection Results -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Hasil Seleksi Fitur dengan Algoritma Genetika
+        </h2>
+        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h3 class="text-lg font-medium text-blue-800 mb-2">
+            Fitur Terpilih:
+          </h3>
+          <ul class="list-disc list-inside space-y-1">
+            {% for feature in selected_features %}
+            <li class="text-blue-700">{{ feature }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
 
+      <!-- KNN Comparison -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Perbandingan Akurasi KNN
+        </h2>
+
+        <!-- KNN Results Table -->
+        <div
+          class="mb-6 overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
+        >
+          {{ knn_results_html|safe }}
+        </div>
+
+        <!-- KNN Comparison Plot -->
+        <div
+          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+        >
+          <img
+            src="data:image/png;base64,{{ knn_plot }}"
+            alt="KNN Comparison"
+            class="w-full h-auto rounded-md"
+          />
+        </div>
+      </div>
+
+      <!-- Confusion Matrix Comparison -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Perbandingan Confusion Matrix
+        </h2>
+
+        <!-- Metrics Tables -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h3 class="text-lg font-medium text-green-800 mb-2">Semua Fitur</h3>
+            <div class="overflow-x-auto">{{ full_metrics_html|safe }}</div>
+          </div>
+          <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h3 class="text-lg font-medium text-blue-800 mb-2">Fitur GA</h3>
+            <div class="overflow-x-auto">{{ ga_metrics_html|safe }}</div>
+          </div>
+        </div>
+
+        <!-- Confusion Matrix Plot -->
+        <div
+          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+        >
+          <img
+            src="data:image/png;base64,{{ confusion_plot }}"
+            alt="Confusion Matrix Comparison"
+            class="w-full h-auto rounded-md"
+          />
+        </div>
+      </div>
+
+      <!-- Model Comparison with GA Features -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Perbandingan Model dengan Fitur GA
+        </h2>
+
+        <!-- GA Model Results Table -->
+        <div
+          class="mb-6 overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
+        >
+          {{ ga_results_html|safe }}
+        </div>
+
+        <!-- GA Model Comparison Plot -->
+        <div
+          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+        >
+          <img
+            src="data:image/png;base64,{{ ga_model_plot }}"
+            alt="GA Model Comparison"
+            class="w-full h-auto rounded-md"
+          />
+        </div>
+      </div>
+
+      <!-- Model Comparison with All Features -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Perbandingan Model dengan Semua Fitur
+        </h2>
+
+        <!-- All Features Model Results Table -->
+        <div
+          class="mb-6 overflow-x-auto rounded-lg border border-gray-200 shadow-sm"
+        >
+          {{ all_results_html|safe }}
+        </div>
+
+        <!-- All Features Model Comparison Plot -->
+        <div
+          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+        >
+          <img
+            src="data:image/png;base64,{{ all_model_plot }}"
+            alt="All Features Model Comparison"
+            class="w-full h-auto rounded-md"
+          />
+        </div>
+      </div>
+
+      <!-- GA vs All Features Comparison -->
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+          Perbandingan Fitur GA vs Semua Fitur
+        </h2>
+
+        <!-- Comparison Plot -->
+        <div
+          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-300"
+        >
+          <img
+            src="data:image/png;base64,{{ comparison_plot }}"
+            alt="GA vs All Features Comparison"
+            class="w-full h-auto rounded-md"
+          />
+        </div>
+      </div>
+      {% if show_prediction_button %}
+      <div
+        class="prediction-section"
+        style="
+          margin-top: 30px;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 5px;
+        "
+      >
+        <h3 style="color: #2c3e50">Manual Churn Prediction</h3>
+        <p>Enter customer details to predict churn probability</p>
+        <a
+          href="/predict_manual"
+          class="btn btn-primary"
+          style="background-color: #3498db; border: none"
+        >
+          Predict Customer Churn
+        </a>
+      </div>
+      {% endif %}
       <!-- Back Button -->
       <div class="text-center mt-8">
         <a

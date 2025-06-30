@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Analysis Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-bold">Custom Analysis Results</h1>
+        <a
+          href="{{ url_for('configure_analysis') }}"
+          class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+        >
+          Back to Configuration
+        </a>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="flex border-b mb-6">
+        <button
+          onclick="showTab('preprocessing')"
+          class="tab-btn active px-4 py-2 font-medium border-b-2 border-indigo-500"
+        >
+          Preprocessing
+        </button>
+        {% if 'clustering' in results %}
+        <button
+          onclick="showTab('clustering')"
+          class="tab-btn px-4 py-2 font-medium"
+        >
+          Clustering
+        </button>
+        {% endif %} {% if 'feature_selection' in results %}
+        <button
+          onclick="showTab('features')"
+          class="tab-btn px-4 py-2 font-medium"
+        >
+          Feature Selection
+        </button>
+        {% endif %} {% if 'model_comparison' in results %}
+        <button
+          onclick="showTab('models')"
+          class="tab-btn px-4 py-2 font-medium"
+        >
+          Model Comparison
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Preprocessing Tab -->
+      <div id="preprocessing" class="tab-content">
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 class="text-xl font-semibold mb-4">Preprocessed Data Sample</h2>
+          <div class="overflow-x-auto">{{ results.preprocessing|safe }}</div>
+        </div>
+      </div>
+
+      <!-- Clustering Tab -->
+      {% if 'clustering' in results %}
+      <div id="clustering" class="tab-content hidden">
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 class="text-xl font-semibold mb-4">Clustering Results</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-lg font-medium mb-3">Cluster Visualization</h3>
+              {% if results.clustering.plot %}
+              <img
+                src="data:image/png;base64,{{ results.clustering.plot }}"
+                alt="Cluster Visualization"
+                class="w-full"
+              />
+              {% else %}
+              <p class="text-red-500">No cluster visualization available</p>
+              {% endif %}
+            </div>
+            <div>
+              <h3 class="text-lg font-medium mb-3">Clustered Data Sample</h3>
+              <div class="overflow-x-auto">
+                {{ results.clustering.data|safe if results.clustering.data else
+                "No clustered data available" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Feature Selection Tab -->
+      {% if 'feature_selection' in results %}
+      <div id="features" class="tab-content hidden">
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 class="text-xl font-semibold mb-4">Selected Features</h2>
+          <div class="mb-4">
+            {% if results.feature_selection.features %}
+            <p class="mb-4">
+              {{ results.feature_selection.count }} features selected:
+            </p>
+            <div class="flex flex-wrap gap-2">
+              {% for feature in results.feature_selection.features %}
+              <span
+                class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+              >
+                {{ feature }}
+              </span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-red-500">No features were selected</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Model Comparison Tab -->
+      {% if 'model_comparison' in results %}
+      <div id="models" class="tab-content hidden">
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 class="text-xl font-semibold mb-4">
+            Model Performance Comparison
+          </h2>
+
+          {% if results.model_comparison.metrics %}
+          <div class="mb-6">
+            <canvas id="modelChart"></canvas>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Model
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Accuracy
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Precision
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Recall
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    F1-Score
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for model, metrics in
+                results.model_comparison.metrics.items() %}
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    {{ model.replace('_', ' ')|title }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    {{ "%.4f"|format(metrics.get('accuracy', 0)) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    {{ "%.4f"|format(metrics.get('precision', 0)) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    {{ "%.4f"|format(metrics.get('recall', 0)) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    {{ "%.4f"|format(metrics.get('f1', 0)) }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-red-500">No model comparison results available</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% if 'model_comparison' in results and results.model_comparison.metrics %}
+    <script>
+      // Tab functionality
+      function showTab(tabId) {
+        // Hide all tab contents
+        document.querySelectorAll(".tab-content").forEach((content) => {
+          content.classList.add("hidden");
+        });
+
+        // Remove active class from all tab buttons
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.remove("border-b-2", "border-indigo-500");
+        });
+
+        // Show selected tab content
+        const tabContent = document.getElementById(tabId);
+        if (tabContent) {
+          tabContent.classList.remove("hidden");
+        }
+
+        // Add active class to clicked tab button
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          if (btn.textContent.trim().toLowerCase() === tabId) {
+            btn.classList.add("border-b-2", "border-indigo-500");
+          }
+        });
+      }
+
+      // Initialize model comparison chart if it exists
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById("modelChart");
+        if (ctx) {
+          try {
+            const metrics = JSON.parse(
+              "{{ results.model_comparison.metrics|tojson|safe }}"
+            );
+
+            const models = Object.keys(metrics);
+            const accuracyData = models.map(
+              (model) => metrics[model].accuracy || 0
+            );
+            const precisionData = models.map(
+              (model) => metrics[model].precision || 0
+            );
+            const recallData = models.map(
+              (model) => metrics[model].recall || 0
+            );
+            const f1Data = models.map((model) => metrics[model].f1 || 0);
+
+            new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels: models.map((model) => model.replace("_", " ")),
+                datasets: [
+                  {
+                    label: "Accuracy",
+                    data: accuracyData,
+                    backgroundColor: "rgba(79, 70, 229, 0.7)",
+                  },
+                  {
+                    label: "Precision",
+                    data: precisionData,
+                    backgroundColor: "rgba(99, 102, 241, 0.7)",
+                  },
+                  {
+                    label: "Recall",
+                    data: recallData,
+                    backgroundColor: "rgba(129, 140, 248, 0.7)",
+                  },
+                  {
+                    label: "F1-Score",
+                    data: f1Data,
+                    backgroundColor: "rgba(165, 180, 252, 0.7)",
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    max: 1,
+                  },
+                },
+              },
+            });
+          } catch (e) {
+            console.error("Error rendering chart:", e);
+            ctx.parentElement.innerHTML =
+              '<p class="text-red-500">Error rendering performance chart</p>';
+          }
+        }
+      });
+    </script>
+    {% endif %}
+  </body>
+</html>
