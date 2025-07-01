@@ -7,6 +7,35 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-50">
+
+        <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden"
+    >
+      <div
+        class="flex flex-col items-center justify-center bg-white rounded-xl p-8 max-w-md w-full mx-4"
+      >
+        <!-- Loading Dots -->
+        <div class="flex space-x-2 justify-center items-center mb-6">
+          <span class="sr-only">Loading...</span>
+          <div
+            class="h-8 w-8 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.3s]"
+          ></div>
+          <div
+            class="h-8 w-8 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.15s]"
+          ></div>
+          <div class="h-8 w-8 bg-indigo-600 rounded-full animate-bounce"></div>
+        </div>
+
+        <!-- Progress Text -->
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">
+          Processing Your Data
+        </h3>
+        <p class="text-gray-600 text-center">
+          Running genetic algorithm optimization. This may take a moment...
+        </p>
+      </div>
+    </div>
     <div class="container mx-auto px-4 py-8 max-w-8xl">
       <h1 class="text-3xl font-bold text-center text-blue-800 mb-8">
         Churn Analysis - Step {{ step }}
@@ -143,7 +172,8 @@
           {% endfor %}
         </div>
 
-        <form method="POST" action="{{ url_for('analyse') }}">
+        <form method="POST" action="{{ url_for('analyse') }}"  id="gaForm"
+          onsubmit="showLoadingOverlay()">
           <input type="hidden" name="current_step" value="4" />
           <h3 class="text-lg font-semibold text-gray-800 mb-4">
             Genetic Algorithm Parameters
@@ -336,5 +366,18 @@
         </a>
       </div>
     </div>
+
+    <script>
+      // Fungsi untuk menampilkan loading overlay
+      function showLoadingOverlay() {
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+      }
+
+      // Fallback: Sembunyikan overlay jika halaman selesai dimuat
+      window.addEventListener('load', function() {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+      });
+    </script>
+    
   </body>
 </html>

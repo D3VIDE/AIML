@@ -159,27 +159,32 @@ def analysis_cluster(df_clustered, df_unscaled):
     df_unscaled['Cluster'] = df_clustered['Cluster']
     plots = []
 
-    # Jumlah anggota tiap cluster
+    # Plot 1: Jumlah anggota tiap cluster
     plt.figure(figsize=(6, 4))
     sns.countplot(data=df_unscaled, x='Cluster', hue='Cluster', palette='Set3', legend=False)
     plt.title("Jumlah Nasabah per Cluster")
     plt.grid(axis='y', linestyle='--', alpha=0.5)
     plots.append(plot_to_base64(plt))
-    
-    # Rata-rata fitur penting per cluster
+    plt.close()
+
+    # Plot 2: Rata-rata fitur penting per cluster (4 subplot)
+    fig, axes = plt.subplots(2, 2, figsize=(12, 6))
     important_features = ['Age', 'Balance', 'EstimatedSalary', 'Exited']
-    plt.figure(figsize=(12, 6))
+    
     for i, feature in enumerate(important_features):
-        plt.subplot(2, 2, i + 1)
-        sns.barplot(data=df_unscaled, x='Cluster', y=feature, hue='Cluster', palette='pastel', errorbar=None, legend=False)
-        plt.title(f'Rata-rata {feature} per Cluster')
-        plt.grid(axis='y', linestyle='--', alpha=0.5)
-        plt.xlabel("Cluster")
-        plt.ylabel(feature)
-    feature_plots = plot_to_base64(plt)
-    plots.append(feature_plots)
+        ax = axes[i // 2, i % 2]
+        sns.barplot(data=df_unscaled, x='Cluster', y=feature, hue='Cluster', palette='pastel', errorbar=None, ax=ax, legend=False)
+        ax.set_title(f'Rata-rata {feature} per Cluster')
+        ax.grid(axis='y', linestyle='--', alpha=0.5)
+        ax.set_xlabel("Cluster")
+        ax.set_ylabel(feature)
+
+    plt.tight_layout()
+    plots.append(plot_to_base64(plt))
+    plt.close()
 
     return df_unscaled, plots
+
 
 def genetic_algorithm(df,pop_size=30, ngen=20):
     # Siapkan data X dan y (pastikan sudah preprocessing & scaling)
@@ -208,11 +213,11 @@ def genetic_algorithm(df,pop_size=30, ngen=20):
     toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
     toolbox.register("select", tools.selTournament, tournsize=3)
 
-    pop = toolbox.population(n=pop_size) #ini 
+    pop = toolbox.population(n=pop_size) 
     hof = tools.HallOfFame(1)
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=ngen ,    
+    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=ngen,    
                         stats=tools.Statistics(lambda ind: ind.fitness.values),
-                        halloffame=hof, verbose=True)  #ini
+                        halloffame=hof, verbose=True)  
 
     # Tampilkan hasil terbaik
     best_ind = hof[0]
